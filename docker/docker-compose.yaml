@@ -1,11 +1,32 @@
 version: '2'
 services:
-    coredns:
+    coredns-intra:
         image: coredns/coredns:latest
-        container_name: coredns
         restart: always
+        entrypoint:
+            - /coredns
+            - -conf
+            - /etc/coredns/Corefile
         ports:
             - '53:53'
             - '53:53/udp'
         volumes:
-            - './conf:/etc/coredns'
+            - '../conf/intra:/etc/coredns'
+#    coredns-dev:
+#        image: coredns/coredns:latest
+#        restart: always
+#        entrypoint:
+#            - /coredns
+#            - -conf
+#            - /etc/coredns/Corefile
+#        ports:
+#            - '53:53'
+#            - '53:53/udp'
+#        volumes:
+#            - '../conf/dev:/etc/coredns'
+    api:
+        image: python:3-alpine
+        restart: always
+        volumes:
+            - '../src/server:/api'
+            - '../conf:/api/conf'
