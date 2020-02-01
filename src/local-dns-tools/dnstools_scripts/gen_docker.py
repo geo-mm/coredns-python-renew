@@ -66,6 +66,8 @@ def create_yam_conf(args, token):
         dest['services']['coredns-{}'.format(n)] = create_coredns_conf(n, h)
 
     return dest
+
+
 #
 #    dest = yaml.load(
 #        '''
@@ -135,7 +137,7 @@ def generate(args):
         yaml.dump(docker, fp)
 
     # copy server files to dest
-    server_path = get_git_root('src/server')
+    server_path = get_git_root('src/local-dns-tools/dnstools_api_server')
     copy_tree(server_path, api_path)
     copy_file(c_path, '{}/conf.json'.format(conf_path))
 
@@ -159,20 +161,27 @@ if __name__ == '__main__':
         'generate', help='generate base configuration')
     '''
     cmd_generate.add_argument('-c', '--conf', action='append',
-                              help='<Required> configuration with interface, eg: abc/0.0.0.0', required=True)
+                            help='<Required> configuration with interface, eg: abc/0.0.0.0', required=True)
     '''
     #cmd_generate.add_argument('--conf_path', help='configuration file path')
+    cmd_generate.add_argument('-c', '--conf', help='configuration file path')
     cmd_generate.add_argument(
-        '-c', '--conf', help='configuration file path')
-    cmd_generate.add_argument(
-        '-p', '--path',  help='destination path, default is current directory')
+        '-p', '--path', help='destination path, default is current directory')
 
     cmd_create = subparsers.add_parser(
         'create', help='create  startup/shutdown scripts')
-    cmd_create.add_argument('-d', '--destination', action='append',
-                            help='<Required> destination DNS host', required=True)
-    cmd_create.add_argument('-n', '--hostname', action='append',
-                            help='<Required> hostname to register', required=True)
+    cmd_create.add_argument(
+        '-d',
+        '--destination',
+        action='append',
+        help='<Required> destination DNS host',
+        required=True)
+    cmd_create.add_argument(
+        '-n',
+        '--hostname',
+        action='append',
+        help='<Required> hostname to register',
+        required=True)
 
     args = parser.parse_args()
     if (args == None):

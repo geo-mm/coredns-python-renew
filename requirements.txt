@@ -1,0 +1,24 @@
+attrs==19.3.0
+certifi==2019.11.28
+chardet==3.0.4
+falcon==2.0.0
+gitdb2==2.0.6
+GitPython==3.0.5
+gunicorn==20.0.4
+idna==2.8
+importlib-metadata==1.5.0
+-e git+https://github.com/geo-mm/coredns-python-renew.git@8854763ef0e3661b7fa141ca29d3144fd79ea3c6#egg=local_dns_tools&subdirectory=src/local-dns-tools
+more-itertools==8.2.0
+packaging==20.1
+pluggy==0.13.1
+py==1.8.1
+pyparsing==2.4.6
+pytest==5.3.5
+requests==2.22.0
+ruamel.yaml==0.16.7
+ruamel.yaml.clib==0.2.0
+six==1.14.0
+smmap2==2.0.5
+urllib3==1.25.8
+wcwidth==0.1.8
+zipp==2.1.0
