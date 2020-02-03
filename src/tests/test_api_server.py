@@ -50,7 +50,7 @@ def setup_module(module):
 
 def teardown_module(module):
     print("\n-------------- teardown after module --------------")
-    # shutil.rmtree(TEST_PROJECT_DATA_ROOT)
+    shutil.rmtree(TEST_PROJECT_DATA_ROOT)
 
 
 class TestDockerConfigs:

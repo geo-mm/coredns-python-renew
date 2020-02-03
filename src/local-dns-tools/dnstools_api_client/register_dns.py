@@ -1,21 +1,52 @@
 import requests
+import argparse
+import json
+import os
 
-headers = {
-    'Authorization':
-        'ZGJjN2ZkYjYwNWQ3ODJiOGUyMDEyMTQ2YmQ0YTJjZDcwY2ViNGUyZGRjNDZiMTRjZTBmMTc0MWZkNWU2M2Q0NTY5YmU0NTg2OGUxZjgzYzllNTBhMTllM2RiOTVlNzIxYWU2YzA0ZTYzZDViYWI2OWE0MzRlMjRiYmYyZWY3ODk='
-}
 
-resp = requests.get('https://localhost:8000', headers=headers, verify=False)
+def register(args):
+    if not (os.path.exists(args.conf)):
+        return
 
-print(resp.json())
+    conf = {}
 
-data = {
-    'namespace': 'dev',
-    'host': 'test.overflow.local',
-    'address': '10.0.33.2'
-}
+    with open(args.conf, mode='r') as fp:
+        conf = json.load(fp)
 
-resp = requests.post(
-    'https://localhost:8000/register', headers=headers, verify=False, json=data)
+    if (conf == None):
+        return
+    else:
+        for k in ['token', 'register']:
+            if not (k in conf.keys()):
+                return
 
-print('code: {}'.format(resp.status_code))
+    headers = {'Authorization': conf['token']}
+
+    for namespace in conf['register'].keys():
+        dic = conf['register'][namespace]
+        for item in dic.keys():
+            j_data = {
+                'namespace': namespace,
+                'host': item,
+                'address': dic[item]
+            }
+            resp = requests.post(args.url + '/register',
+                                 headers=headers, json=j_data, verify=False)
+            if (resp.status_code != 200):
+                return
+
+
+if __name__ == '__main__':
+    (major, minor, a, b, c) = sys.version_info[:]
+
+    parser = argparse.ArgumentParser(
+        description='Register DNS service')
+    parser.add_argument(
+        '-c', '--conf', help='configuration file path', required=True)
+    parser.add_argument('-u', '--url', help='server URL', required=True)
+
+    args = parser.parse_args()
+    if (args == None):
+        parser.print_help()
+    else:
+        register(args)

@@ -15,4 +15,4 @@ for i in $pkgs; do
     install_pkgs $i
 done
 
-gunicorn --certfile=/api/server.crt --keyfile=/api/server.key -b 0.0.0.0:8000 api:app
+gunicorn --certfile=/api/server.crt --keyfile=/api/server.key -b 0.0.0.0:8000 __init__:createApp
