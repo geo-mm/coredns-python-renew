@@ -3,6 +3,7 @@ import os
 import json
 import copy
 import re
+from ipaddress import IPv4Address, IPv4Network
 
 AUTH_TOKEN = ''
 CONF_PATH = ''
@@ -10,6 +11,7 @@ HOST_RECORDS_FILE = ''
 CONF_FILE = ''
 gConf = {}
 gHosts = {}
+gRestrict = []
 
 
 def read_json_file(path):
@@ -45,7 +47,7 @@ DNS_REC_TEMPLATE = """
 def write_host_with_namespace(namespace, records):
     try:
         for hostname in records.keys():
-            fileName = '{}.conf'.format(hostname.replace(',', '_'))
+            fileName = '{}.conf'.format(hostname.replace('.', '_'))
             filePath = '{}/{}/hosts/{}'.format(CONF_PATH, namespace, fileName)
             with open(filePath, 'w') as fp:
                 template = DNS_REC_TEMPLATE.replace('###HOST_NAME###',
@@ -111,8 +113,22 @@ class RegisterHost(object):
         args = req.context.doc
 
         if not check_tags(['namespace', 'host', 'address'], args):
-            _invalid_parameter(resp)
+            self._invalid_parameter(resp)
             return
+
+        if len(gRestrict) > 0:
+            validAddr = False
+            for ip_range in gRestrict:
+                result = IPv4Address(args['address']) in ip_range
+                print('address = {}, range = {}, result = {}'.format(
+                    args['address'], str(ip_range), result))
+                if (IPv4Address(args['address']) in ip_range):
+                    validAddr = True
+                    break
+            if not validAddr:
+                print('{} not Valid'.format(args['address']))
+                self._invalid_parameter(resp)
+                return
 
         oldRec = copy.deepcopy(gHosts)
         newRec = copy.deepcopy(gHosts)
@@ -149,7 +165,8 @@ class ListHost(object):
             resp.body = (json.dumps(gHosts))
         else:
             resp.status = falcon.HTTP_503  # Host data is not ready
-            resp.body = ('{"message": "host data does not exist or corrupted"}')
+            resp.body = (
+                '{"message": "host data does not exist or corrupted"}')
 
 
 class AuthMiddleware(object):
@@ -201,7 +218,7 @@ class JSONTranslator(object):
             # Nothing to do
             return
 
-        body = req.stream.read()
+        body = req.stream.read(req.content_length or 0)
         if not body:
             raise falcon.HTTPBadRequest('Empty request body',
                                         'A valid JSON document is required.')
@@ -230,6 +247,7 @@ def envInit():
     global CONF_FILE
     global gConf
     global gHosts
+    global gRestrict
 
     AUTH_TOKEN = os.environ.get('AUTH_TOKEN')
     CONF_PATH = os.environ.get('API_CONF_PATH')
@@ -248,6 +266,13 @@ def envInit():
     if (gConf == None):
         print('Failed to read config files. Exit')
         exit(1)
+
+    print(gConf['address']['allow'])
+    print(type(gConf['address']['allow']))
+    if ('address' in gConf.keys()) and ('allow' in gConf['address'].keys()) and (gConf['address']['allow'] != None):
+        for ip in gConf['address']['allow']:
+            print(ip)
+            gRestrict.append(IPv4Network(ip))
 
     gHosts = read_host_conf()
 
