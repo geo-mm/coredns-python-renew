@@ -5,7 +5,7 @@ install_pkgs() {
 
     if [ $res -eq 0 ]; then
         echo "=== Install $1"
-        echo "pip3 install --no-cache-dir $1"
+        pip3 install --no-cache-dir $1
     fi
 }
 
@@ -15,4 +15,4 @@ for i in $pkgs; do
     install_pkgs $i
 done
 
-gunicorn --certfile=/api/server.crt --keyfile=/api/server.key -b 0.0.0.0:8000 __init__:createApp
+gunicorn --certfile=/api/server.crt --keyfile=/api/server.key -b 0.0.0.0:8000 '__init__:createApp()'

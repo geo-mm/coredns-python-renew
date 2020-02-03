@@ -52,7 +52,9 @@ def create_yam_conf(args, token):
                 'image': 'python:3-alpine',
                 'restart': 'always',
                 'volumes': ['api:/api', 'conf:/api/conf'],
-                'environment': ['AUTH_TOKEN={}'.format(token)]
+                'environment': ['AUTH_TOKEN={}'.format(token)],
+                'working_dir': '/api',
+                'entrypoint': '/api/entry.sh'
             }
         }
     }
