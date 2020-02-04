@@ -18,16 +18,18 @@ def get_git_root(path):
 TEST_PROJECT_DATA_ROOT = get_git_root('test_data')
 TEST_AUTH_TOKEN = "MzRjY2ZlMWZkYmFkNDFiNWExZmQ1NTE2MTI2ZjA5M2VlZjhmYzQwNzg5ODlhMWFlYzA2N2ZhYTM2OTM4MWRhYWVlNWY0MTg4MzdiNjlhZGNjNjE4M2Q2NjFkNmQ1ZjZjY2VlMTA5MTFkYzhkZjk1NGU2YTU2ODNkMzMxYmY4NTI="
 
-
 # TEST_AUTH_TOKEN
 CONF_DATA = {
-    "register": {"dev": {
-        "ii.overflow.local": "10.0.45.77",
-        "ii2.overflow.local": "10.0.46.79",
-    }, "intra": {
-        "ii3.overflow.local": "10.0.45.11",
-        "ii4.overflow.local": "10.0.46.11",
-    }},
+    "register": {
+        "dev": {
+            "ii.overflow.local": "10.0.45.77",
+            "ii2.overflow.local": "10.0.46.79",
+        },
+        "intra": {
+            "ii3.overflow.local": "10.0.45.11",
+            "ii4.overflow.local": "10.0.46.11",
+        }
+    },
     "token": TEST_AUTH_TOKEN
 }
 
@@ -50,10 +52,7 @@ def teardown_module(module):
 
 @responses.activate
 def test_register_api():
-    data = {
-        'dev': {},
-        'intra': {}
-    }
+    data = {'dev': {}, 'intra': {}}
 
     params = {}
     headers = {}
@@ -67,7 +66,8 @@ def test_register_api():
         return (200, request.headers, json.dumps(data))
 
     responses.add_callback(
-        responses.POST, 'https://localhost:8000/register',
+        responses.POST,
+        'https://localhost:8000/register',
         callback=request_callback,
         content_type='application/json',
     )
@@ -79,6 +79,85 @@ def test_register_api():
     assert len(responses.calls) == 4
     assert "ii.overflow.local" in data['dev'].keys()
     assert "10.0.45.77" == data['dev']["ii.overflow.local"]
+    assert "ii2.overflow.local" in data['dev'].keys()
+    assert "10.0.46.79" == data['dev']["ii2.overflow.local"]
+    assert "ii.overflow.local" in data['dev'].keys()
+    assert "10.0.45.11" == data['intra']["ii3.overflow.local"]
+    assert "ii2.overflow.local" in data['dev'].keys()
+    assert "10.0.46.11" == data['intra']["ii4.overflow.local"]
+
+
+@responses.activate
+def test_register_api_parameter_only():
+    data = {'dev': {}, 'intra': {}}
+
+    params = {}
+    headers = {}
+
+    def request_callback(request):
+        payload = json.loads(request.body)
+        params = payload
+        headers = request.headers
+        data[payload['namespace']][payload['host']] = payload['address']
+        resp_body = data
+        return (200, request.headers, json.dumps(data))
+
+    responses.add_callback(
+        responses.POST,
+        'https://localhost:8000/register',
+        callback=request_callback,
+        content_type='application/json',
+    )
+
+    args = Namespace(
+        url='https://localhost:8000',
+        token=TEST_AUTH_TOKEN,
+        namespace='dev',
+        host='ii.overflow.local',
+        address='10.0.45.78')
+
+    register(args)
+
+    assert len(responses.calls) == 1
+    assert "ii.overflow.local" in data['dev'].keys()
+    assert "10.0.45.78" == data['dev']["ii.overflow.local"]
+
+
+@responses.activate
+def test_register_api_override_by_params():
+    data = {'dev': {}, 'intra': {}}
+
+    params = {}
+    headers = {}
+
+    def request_callback(request):
+        payload = json.loads(request.body)
+        params = payload
+        headers = request.headers
+        data[payload['namespace']][payload['host']] = payload['address']
+        resp_body = data
+        return (200, request.headers, json.dumps(data))
+
+    responses.add_callback(
+        responses.POST,
+        'https://localhost:8000/register',
+        callback=request_callback,
+        content_type='application/json',
+    )
+
+    args = Namespace(
+        url='https://localhost:8000',
+        conf=TEST_CONF_PATH,
+        token=TEST_AUTH_TOKEN,
+        namespace='dev',
+        host='ii.overflow.local',
+        address='10.0.45.78')
+
+    register(args)
+
+    assert len(responses.calls) == 4
+    assert "ii.overflow.local" in data['dev'].keys()
+    assert "10.0.45.78" == data['dev']["ii.overflow.local"]
     assert "ii2.overflow.local" in data['dev'].keys()
     assert "10.0.46.79" == data['dev']["ii2.overflow.local"]
     assert "ii.overflow.local" in data['dev'].keys()
