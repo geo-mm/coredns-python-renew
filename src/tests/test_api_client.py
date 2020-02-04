@@ -113,7 +113,7 @@ def test_register_api_parameter_only():
         url='https://localhost:8000',
         token=TEST_AUTH_TOKEN,
         namespace='dev',
-        host='ii.overflow.local',
+        hostname='ii.overflow.local',
         address='10.0.45.78')
 
     register(args)
@@ -150,7 +150,7 @@ def test_register_api_override_by_params():
         conf=TEST_CONF_PATH,
         token=TEST_AUTH_TOKEN,
         namespace='dev',
-        host='ii.overflow.local',
+        hostname='ii.overflow.local',
         address='10.0.45.78')
 
     register(args)
