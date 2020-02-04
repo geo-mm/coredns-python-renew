@@ -63,6 +63,8 @@ def test_register_api():
         headers = request.headers
         data[payload['namespace']][payload['host']] = payload['address']
         resp_body = data
+        assert ('Authorization' in headers.keys()) and (headers['Authorization']
+                                                        != None)
         return (200, request.headers, json.dumps(data))
 
     responses.add_callback(
@@ -100,6 +102,8 @@ def test_register_api_parameter_only():
         headers = request.headers
         data[payload['namespace']][payload['host']] = payload['address']
         resp_body = data
+        assert ('Authorization' in headers.keys()) and (headers['Authorization']
+                                                        != None)
         return (200, request.headers, json.dumps(data))
 
     responses.add_callback(
@@ -136,6 +140,8 @@ def test_register_api_override_by_params():
         headers = request.headers
         data[payload['namespace']][payload['host']] = payload['address']
         resp_body = data
+        assert ('Authorization' in headers.keys()) and (headers['Authorization']
+                                                        != None)
         return (200, request.headers, json.dumps(data))
 
     responses.add_callback(
