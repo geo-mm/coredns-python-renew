@@ -1,3 +1,9 @@
+# 動機
+
+因工作需求需要架個 DNS server 做測試, 對同一網域把 N 個不同網段的查詢導向不同 IP 位置. 目前想到的是使用 N 個 CoreDNS container bind 不同網段, 由一個 API Server 負責接收外部註冊 host name 並寫到 CoreDNS 的設定當中.
+
+# 使用方式
+
 # Falcon
 
 ```sh

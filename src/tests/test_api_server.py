@@ -66,6 +66,7 @@ class TestDockerConfigs:
     def test_files_exist(self):
         API_CONF_PATH = '{}/conf'.format(TEST_DATA_PATH)
         assert os.path.exists(API_CONF_PATH + '/conf.json')
+        assert os.path.exists(API_CONF_PATH + '/client.conf.json')
         assert os.path.exists(API_CONF_PATH + '/dev')
         assert os.path.exists(API_CONF_PATH + '/dev/Corefile')
         assert os.path.exists(API_CONF_PATH + '/dev/hosts')

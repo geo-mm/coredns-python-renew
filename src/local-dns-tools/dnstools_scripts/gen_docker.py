@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 
 import argparse
-import os
-from ruamel.yaml import YAML
-import sys
-import pathlib
+import copy
 import git
-from distutils.dir_util import copy_tree
-from distutils.file_util import copy_file
 import json
 import os
+import os
+import pathlib
+import sys
+
+from distutils.dir_util import copy_tree
+from distutils.file_util import copy_file
+from ruamel.yaml import YAML
 
 COREDNS_ROOT_CONF = """
 .  {
@@ -23,6 +25,8 @@ COREDNS_ROOT_CONF = """
 import hosts/*
 reload 3
 """
+
+CLIENT_CONF_DATA = {"register": {}, "token": ""}
 
 
 def get_git_root(path):
@@ -70,33 +74,9 @@ def create_yam_conf(args, token):
     return dest
 
 
-#
-#    dest = yaml.load(
-#        '''
-#version: '2'
-# services:
-#    coredns-intra:
-#        image: coredns/coredns:latest
-#        restart: always
-#        entrypoint:
-#            - /coredns
-#            - -conf
-#            - /etc/coredns/Corefile
-#        ports:
-#            - '53:53'
-#            - '53:53/udp'
-#        volumes:
-#            - '../conf/intra:/etc/coredns'
-#        '''
-#    )
-#    print(dest)
-#    print(yaml.dump(dest, sys.stdout))
-
-
 def generate(args):
     # create path
     root_path = '.' if args.path == None else args.path
-    #c_path = './gen_docker.conf' if args.conf_path == None else args.conf_path
     c_path = './gen_docker.conf' if args.conf == None else args.conf
 
     with open(c_path) as fp:
@@ -134,6 +114,7 @@ def generate(args):
     auth_token = conf['token']
     docker = create_yam_conf(yaml_conf, auth_token)
     docker_file = '{}/docker-compose.yaml'.format(root_path)
+    client_conf_file = '{}/client.conf.json'.format(conf_path)
 
     with open(docker_file, mode='w') as fp:
         yaml.dump(docker, fp)
@@ -142,6 +123,11 @@ def generate(args):
     server_path = get_git_root('src/local-dns-tools/dnstools_api_server')
     copy_tree(server_path, api_path)
     copy_file(c_path, '{}/conf.json'.format(conf_path))
+
+    with open(client_conf_file, mode='w') as fp:
+        client_conf = copy.deepcopy(CLIENT_CONF_DATA)
+        client_conf['token'] = auth_token
+        json.dump(client_conf, fp, indent=4)
 
 
 def create(args):
