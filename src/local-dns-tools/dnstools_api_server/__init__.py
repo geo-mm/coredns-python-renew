@@ -34,12 +34,18 @@ def write_json_file(conf, path):
         return False
 
 
+#
+# ###HOST_NAME### {
+#    hosts {
+#        ###ADDRESS### ###HOST_NAME###
+#        fallthrough
+#    }
+# }
+
 DNS_REC_TEMPLATE = """
-###HOST_NAME### {
-    hosts {
-        ###ADDRESS### ###HOST_NAME###
-        fallthrough
-    }
+hosts {
+    ###ADDRESS### ###HOST_NAME###
+    fallthrough
 }
 """
 
@@ -165,8 +171,7 @@ class ListHost(object):
             resp.body = (json.dumps(gHosts))
         else:
             resp.status = falcon.HTTP_503  # Host data is not ready
-            resp.body = (
-                '{"message": "host data does not exist or corrupted"}')
+            resp.body = ('{"message": "host data does not exist or corrupted"}')
 
 
 class AuthMiddleware(object):
@@ -269,7 +274,8 @@ def envInit():
 
     print(gConf['address']['allow'])
     print(type(gConf['address']['allow']))
-    if ('address' in gConf.keys()) and ('allow' in gConf['address'].keys()) and (gConf['address']['allow'] != None):
+    if ('address' in gConf.keys()) and ('allow' in gConf['address'].keys(
+    )) and (gConf['address']['allow'] != None):
         for ip in gConf['address']['allow']:
             print(ip)
             gRestrict.append(IPv4Network(ip))

@@ -15,15 +15,17 @@ from ruamel.yaml import YAML
 
 COREDNS_ROOT_CONF = """
 .  {
-    chaos
+    #chaos
     #whoami
+    import hosts/*
+    reload 10
     forward . ##DNS##
     #log
     #errors
 }
 
-import hosts/*
-reload 3
+#import hosts/*
+#reload 3
 """
 
 CLIENT_CONF_DATA = {"register": {}, "token": ""}

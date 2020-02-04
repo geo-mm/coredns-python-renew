@@ -123,15 +123,16 @@ class TestAPIServer:
             host_data = json.load(fp)
             assert host_name in host_data['dev'].keys()
 
-        host_full_path = '{}/dev/hosts/{}'.format(
-            TestAPIServer.API_CONF_PATH, host_file)
+        host_full_path = '{}/dev/hosts/{}'.format(TestAPIServer.API_CONF_PATH,
+                                                  host_file)
 
         assert os.path.exists(host_full_path)
 
         with open(host_full_path, 'r') as fp:
             content = fp.read()
             result = re.search(
-                r"[ |\t]*ii.overflow.local *{ *\n[ |\t]*hosts *{ *\n[ |\t]*10.0.45.77 *ii.overflow.local", content, re.MULTILINE)
+                r"[ |\t]*hosts *{ *\n[ |\t]*10.0.45.77 *ii.overflow.local",
+                content, re.MULTILINE)
             assert result != None
 
     def test_api_allow(self):
@@ -152,7 +153,7 @@ class TestAPIServer:
             host_data = json.load(fp)
             assert not (host_name in host_data['dev'].keys())
 
-        host_full_path = '{}/dev/hosts/{}'.format(
-            TestAPIServer.API_CONF_PATH, host_file)
+        host_full_path = '{}/dev/hosts/{}'.format(TestAPIServer.API_CONF_PATH,
+                                                  host_file)
 
         assert not os.path.exists(host_full_path)
