@@ -32,10 +32,10 @@ def register(args):
         token = args.token
 
     #if ('namespace' in argDic.keys()) and ('host' in argDic.keys()):
-    if (containAll(['namespace', 'host', 'address'], argDic)):
+    if (containAll(['namespace', 'hostname', 'address'], argDic)):
         if not (args.namespace in register.keys()):
             register[args.namespace] = {}
-        register[args.namespace][args.host] = args.address
+        register[args.namespace][args.hostname] = args.address
 
     headers = {'Authorization': token}
 
@@ -65,7 +65,7 @@ if __name__ == '__main__':
     parser.add_argument('-u', '--url', help='server URL', required=True)
     parser.add_argument('-t', '--token', help='authorization token')
     parser.add_argument('-s', '--namespace', help='DNS namespace')
-    parser.add_argument('-h', '--host', help='registered host name')
+    parser.add_argument('-n', '--hostname', help='registered host name')
     parser.add_argument('-a', '--address', help='registered host address')
 
     args = parser.parse_args()
