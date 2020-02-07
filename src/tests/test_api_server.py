@@ -70,9 +70,11 @@ class TestDockerConfigs:
         assert os.path.exists(API_CONF_PATH + '/dev')
         assert os.path.exists(API_CONF_PATH + '/dev/Corefile')
         assert os.path.exists(API_CONF_PATH + '/dev/hosts')
+        assert os.path.exists(API_CONF_PATH + '/dev/hosts/default')
         assert os.path.exists(API_CONF_PATH + '/intra')
         assert os.path.exists(API_CONF_PATH + '/intra/Corefile')
         assert os.path.exists(API_CONF_PATH + '/intra/hosts')
+        assert os.path.exists(API_CONF_PATH + '/intra/hosts/default')
 
 
 class TestAPIServer:
@@ -105,10 +107,39 @@ class TestAPIServer:
         result = client.simulate_get('/', headers=self.auth)
         assert result.json == doc
 
+    def test_api_allow(self):
+        client = TestAPIServer._client()
+        host_name = 'ii2.overflow.local'
+        host_file = 'default'
+        params = {
+            'namespace': 'dev',
+            'address': '10.0.100.77',
+            'host': host_name
+        }
+
+        result = client.simulate_post(
+            '/register', headers=self.auth, json=params)
+        assert not (result.status_code in [200, 204])
+
+        with open(self.HOST_CONF_PATH, 'r') as fp:
+            host_data = json.load(fp)
+            assert not (host_name in host_data['dev'].keys())
+
+        host_full_path = '{}/dev/hosts/{}'.format(TestAPIServer.API_CONF_PATH,
+                                                  host_file)
+
+        assert os.path.exists(host_full_path)
+        with open(host_full_path, 'r') as fp:
+            content = fp.read()
+            result = re.search(
+                r"[ |\t]*hosts *{ *\n[ |\t]*10.0.45.77 *ii.overflow.local",
+                content, re.MULTILINE)
+            assert result == None        
+
     def test_register_api(self):
         client = TestAPIServer._client()
         host_name = 'ii.overflow.local'
-        host_file = host_name.replace('.', '_') + '.conf'
+        host_file = 'default'
         params = {
             'namespace': 'dev',
             'address': '10.0.45.77',
@@ -134,26 +165,3 @@ class TestAPIServer:
                 r"[ |\t]*hosts *{ *\n[ |\t]*10.0.45.77 *ii.overflow.local",
                 content, re.MULTILINE)
             assert result != None
-
-    def test_api_allow(self):
-        client = TestAPIServer._client()
-        host_name = 'ii2.overflow.local'
-        host_file = host_name.replace('.', '_') + '.conf'
-        params = {
-            'namespace': 'dev',
-            'address': '10.0.100.77',
-            'host': host_name
-        }
-
-        result = client.simulate_post(
-            '/register', headers=self.auth, json=params)
-        assert not (result.status_code in [200, 204])
-
-        with open(self.HOST_CONF_PATH, 'r') as fp:
-            host_data = json.load(fp)
-            assert not (host_name in host_data['dev'].keys())
-
-        host_full_path = '{}/dev/hosts/{}'.format(TestAPIServer.API_CONF_PATH,
-                                                  host_file)
-
-        assert not os.path.exists(host_full_path)

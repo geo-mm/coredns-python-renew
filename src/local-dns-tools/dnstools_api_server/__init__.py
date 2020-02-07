@@ -42,9 +42,11 @@ def write_json_file(conf, path):
 #    }
 # }
 
-DNS_REC_TEMPLATE = """
+DNS_REC_TEMPLATE_HEADER = """
 hosts {
-    ###ADDRESS### ###HOST_NAME###
+"""
+
+DNS_REC_TEMPLATE_FOOTER = """
     fallthrough
 }
 """
@@ -52,15 +54,23 @@ hosts {
 
 def write_host_with_namespace(namespace, records):
     try:
-        for hostname in records.keys():
-            fileName = '{}.conf'.format(hostname.replace('.', '_'))
-            filePath = '{}/{}/hosts/{}'.format(CONF_PATH, namespace, fileName)
-            with open(filePath, 'w') as fp:
-                template = DNS_REC_TEMPLATE.replace('###HOST_NAME###',
-                                                    hostname).replace(
-                                                        '###ADDRESS###',
-                                                        records[hostname])
-                fp.write(template)
+        filePath = '{}/{}/hosts/default'.format(CONF_PATH, namespace)
+        with open(filePath, 'w') as fp:
+            #fp.write(template)
+            fp.write(DNS_REC_TEMPLATE_HEADER)
+            for hostname in records.keys():
+                fp.write('    {} {}'.format(records[hostname], hostname))
+            fp.write(DNS_REC_TEMPLATE_FOOTER)
+        
+        #for hostname in records.keys():
+            #fileName = '{}.conf'.format(hostname.replace('.', '_'))
+            # filePath = '{}/{}/hosts/{}'.format(CONF_PATH, namespace, fileName)
+            # with open(filePath, 'w') as fp:
+            #     template = DNS_REC_TEMPLATE.replace('###HOST_NAME###',
+            #                                         hostname).replace(
+            #                                             '###ADDRESS###',
+            #                                             records[hostname])
+            #     fp.write(template)
     except Exception as e:
         print('Failed to update DNS record in [{}]: e'.format(namespace, e))
         return False

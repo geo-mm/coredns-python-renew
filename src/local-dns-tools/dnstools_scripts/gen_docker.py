@@ -17,8 +17,8 @@ COREDNS_ROOT_CONF = """
 .  {
     #chaos
     #whoami
-    import hosts/*
-    reload 10
+    import /etc/coredns/hosts/*
+    reload 10s
     forward . ##DNS##
     #log
     #errors
@@ -60,6 +60,7 @@ def create_yam_conf(args, token):
                 'volumes': ['api:/api', 'conf:/api/conf'],
                 'environment': ['AUTH_TOKEN={}'.format(token)],
                 'working_dir': '/api',
+                'port': ['443:8000'],
                 'entrypoint': '/api/entry.sh'
             }
         }
@@ -103,6 +104,9 @@ def generate(args):
             yaml_conf.append((k, h))
             print(h_path)
             pathlib.Path(h_path).mkdir(parents=True, exist_ok=True)
+            default_file = '{}/default'.format(h_path)
+            with open(default_file, mode='w', encoding="utf-8") as fp:
+                fp.write('\n')
             with open(core_path, mode='w', encoding="utf-8") as fp:
                 fp.write(gen_root_corefile(inf[k]['dns']))
 
